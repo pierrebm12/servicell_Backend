@@ -7,8 +7,6 @@ RUN corepack enable && pnpm install --frozen-lockfile
 COPY prisma ./prisma/
 RUN npx prisma generate
 
-RUN pnpm prune --prod
-
 COPY dist ./dist
 
 ENV NODE_ENV=production
