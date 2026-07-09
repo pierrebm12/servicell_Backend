@@ -54,7 +54,7 @@ async function bootstrap() {
     app.use((0, compression_1.default)());
     app.use(rateLimit.default({
         windowMs: 15 * 60 * 1000,
-        max: 100,
+        max: 1000,
     }));
     app.enableCors({
         origin: process.env.FRONTEND_URL || '*',
