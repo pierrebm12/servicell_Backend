@@ -16,6 +16,12 @@ export class UploadService {
     }
   }
 
+  private fullUrl(relative: string): string {
+    const baseUrl = process.env.API_URL || '';
+    if (baseUrl && relative.startsWith('/')) return `${baseUrl}${relative}`;
+    return relative;
+  }
+
   async saveBase64(base64: string, prefix: string = 'photo'): Promise<string> {
     const matches = base64.match(/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,(.+)$/);
     let ext = 'png';
@@ -39,7 +45,7 @@ export class UploadService {
       return result.secure_url;
     } catch (err) {
       this.logger.warn(`Cloudinary upload failed, using local: ${(err as Error).message}`);
-      return `/uploads/${filename}`;
+      return this.fullUrl(`/uploads/${filename}`);
     }
   }
 
@@ -55,7 +61,7 @@ export class UploadService {
       return result.secure_url;
     } catch (err) {
       this.logger.warn(`Cloudinary upload failed, using local: ${(err as Error).message}`);
-      return `/uploads/${filename}`;
+      return this.fullUrl(`/uploads/${filename}`);
     }
   }
 }

@@ -60,6 +60,12 @@ let UploadService = UploadService_1 = class UploadService {
                 fs.mkdirSync(dir, { recursive: true });
         }
     }
+    fullUrl(relative) {
+        const baseUrl = process.env.API_URL || '';
+        if (baseUrl && relative.startsWith('/'))
+            return `${baseUrl}${relative}`;
+        return relative;
+    }
     async saveBase64(base64, prefix = 'photo') {
         const matches = base64.match(/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,(.+)$/);
         let ext = 'png';
@@ -81,7 +87,7 @@ let UploadService = UploadService_1 = class UploadService {
         }
         catch (err) {
             this.logger.warn(`Cloudinary upload failed, using local: ${err.message}`);
-            return `/uploads/${filename}`;
+            return this.fullUrl(`/uploads/${filename}`);
         }
     }
     async saveFile(buffer, originalName) {
@@ -95,7 +101,7 @@ let UploadService = UploadService_1 = class UploadService {
         }
         catch (err) {
             this.logger.warn(`Cloudinary upload failed, using local: ${err.message}`);
-            return `/uploads/${filename}`;
+            return this.fullUrl(`/uploads/${filename}`);
         }
     }
 };
