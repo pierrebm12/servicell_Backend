@@ -130,12 +130,20 @@ let PdfService = PdfService_1 = class PdfService {
         const colTx = (c) => c === 'left' ? MARGIN + 6 : MID + 11;
         let ly = y, ry = y;
         ly = this.drawSectionBox(page, 'DATOS DEL CLIENTE', colX('left'), ly, boldFont);
-        for (const line of [
+        const clientLines = [
             `${order.client.name}`, `CC: ${order.client.document}`, `Tel: ${order.client.phone}`,
             ...(order.client.email ? [`Email: ${order.client.email}`] : []),
-        ]) {
+        ];
+        for (const line of clientLines) {
             this.drawSafe(page, line, { x: colTx('left'), y: ly, size: 9, font });
             ly -= 14;
+        }
+        if (order.clientPhotoUrl) {
+            const photoX = MID - 130;
+            const photoY = ly + clientLines.length * 10;
+            page.drawRectangle({ x: photoX - 2, y: photoY - 82, width: 124, height: 84, borderColor: (0, pdf_lib_1.rgb)(0.7, 0.7, 0.7), borderWidth: 0.5 });
+            await this.tryDrawImage(pdfDoc, page, order.clientPhotoUrl, photoX, photoY, 120, 80);
+            ly = Math.min(ly, photoY - 86);
         }
         ly -= SEC_BOTTOM_PAD;
         ly = this.ensureSpaceAndSync(page, ly, 80, pdfDoc, (v) => ly = v, (v, p) => { ry = v; if (p)
@@ -344,16 +352,6 @@ let PdfService = PdfService_1 = class PdfService {
                 entregaY = await drawPhotoGrid(entregas, MID + 10, 20);
             }
             y = Math.min(ingresoY, entregaY) - SEC_BOTTOM_PAD;
-        }
-        if (order.clientPhotoUrl) {
-            if (y - 120 < 65) {
-                const r = this.newPage(pdfDoc);
-                page = r.page;
-                y = r.y;
-            }
-            y = this.drawSectionBox(page, 'FOTO DEL CLIENTE', MARGIN, y, boldFont);
-            const imgH = await this.tryDrawImage(pdfDoc, page, order.clientPhotoUrl, MARGIN + 8, y - 4, 140, 100);
-            y -= (imgH || 100) + SEC_BOTTOM_PAD + 4;
         }
         const sigIngreso = order.signatures.find((s) => s.type === 'INGRESO');
         const sigEntrega = order.signatures.find((s) => s.type === 'ENTREGA');
