@@ -15,6 +15,8 @@ async function bootstrap() {
 
 
 
+  app.set('trust proxy', 1);
+
   app.useBodyParser('json', { limit: '10mb' });
 
   app.setGlobalPrefix('api/v1');

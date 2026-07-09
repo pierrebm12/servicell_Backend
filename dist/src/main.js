@@ -47,6 +47,7 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const logger = new common_1.Logger('Bootstrap');
     app.useStaticAssets(path.resolve(process.cwd(), 'uploads'), { prefix: '/uploads' });
+    app.set('trust proxy', 1);
     app.useBodyParser('json', { limit: '10mb' });
     app.setGlobalPrefix('api/v1');
     app.use((0, helmet_1.default)());
