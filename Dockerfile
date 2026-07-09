@@ -9,9 +9,7 @@ COPY prisma ./prisma/
 RUN npx prisma generate
 
 COPY dist ./dist
-RUN pnpm prisma:push 2>&1 || true
-RUN node dist/prisma/seed.js
 
 ENV NODE_ENV=production
 EXPOSE 8080
-CMD ["node", "dist/src/main"]
+CMD sh -c "pnpm prisma:push && node dist/prisma/seed.js && node dist/src/main"
