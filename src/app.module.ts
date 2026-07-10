@@ -21,6 +21,7 @@ import { ConfigModule as AppConfigModule } from './config/config.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { UploadModule } from './upload/upload.module';
+import { VersionsModule } from './versions/versions.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { UploadModule } from './upload/upload.module';
     CloudinaryModule,
     CatalogModule,
     UploadModule,
+    VersionsModule,
   ],
   providers: [
     {

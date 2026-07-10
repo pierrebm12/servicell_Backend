@@ -30,6 +30,7 @@ const config_module_1 = require("./config/config.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
 const catalog_module_1 = require("./catalog/catalog.module");
 const upload_module_1 = require("./upload/upload.module");
+const versions_module_1 = require("./versions/versions.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -57,6 +58,7 @@ exports.AppModule = AppModule = __decorate([
             cloudinary_module_1.CloudinaryModule,
             catalog_module_1.CatalogModule,
             upload_module_1.UploadModule,
+            versions_module_1.VersionsModule,
         ],
         providers: [
             {
