@@ -129,6 +129,8 @@ export declare class OrdersService {
         status?: string;
         limit?: number;
         sort?: string;
+        dateFrom?: string;
+        dateTo?: string;
     }): Promise<({
         client: {
             email: string | null;

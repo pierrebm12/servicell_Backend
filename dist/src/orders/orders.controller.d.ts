@@ -132,7 +132,7 @@ export declare class OrdersController {
         modelId: number | null;
         serviceTypeId: number | null;
     }>;
-    findAll(search?: string, status?: string, limit?: string, sort?: string): Promise<({
+    findAll(search?: string, status?: string, limit?: string, sort?: string, dateFrom?: string, dateTo?: string): Promise<({
         client: {
             email: string | null;
             id: number;

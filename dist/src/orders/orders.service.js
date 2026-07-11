@@ -107,6 +107,16 @@ let OrdersService = class OrdersService {
                 where.status = { in: backendStatuses };
             }
         }
+        if (filters?.dateFrom || filters?.dateTo) {
+            where.createdAt = {};
+            if (filters.dateFrom)
+                where.createdAt.gte = new Date(filters.dateFrom);
+            if (filters.dateTo) {
+                const end = new Date(filters.dateTo);
+                end.setHours(23, 59, 59);
+                where.createdAt.lte = end;
+            }
+        }
         if (filters?.search) {
             const s = filters.search;
             where.OR = [

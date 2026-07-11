@@ -38,12 +38,16 @@ export class OrdersController {
     @Query('status') status?: string,
     @Query('limit') limit?: string,
     @Query('sort') sort?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ) {
     return this.ordersService.findAll({
       search,
       status,
       limit: limit ? parseInt(limit, 10) : undefined,
       sort,
+      dateFrom,
+      dateTo,
     });
   }
 
