@@ -105,19 +105,40 @@ export class PdfService {
 
     // ── LEFT ────────────────────────────────────────────────
     ly = this.drawSectionBox(page, 'DATOS DEL CLIENTE', colX('left'), ly, boldFont);
+
+    // Photo centered at top, then text data below
+    if (order.clientPhotoUrl) {
+      try {
+        const buf = await this.fetchImageBuffer(order.clientPhotoUrl);
+        if (buf && buf.length >= 20) {
+          const isSvg = buf[0] === 0x3C;
+          const isPng = buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47;
+          let img;
+          if (isSvg || isPng) {
+            img = await pdfDoc.embedPng(await sharp(buf).flatten({ background: { r: 255, g: 255, b: 255 } }).png().toBuffer());
+          } else {
+            img = await pdfDoc.embedJpg(buf);
+          }
+          const maxW = COL_W - 20;
+          const maxH = 100;
+          const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+          const dw = img.width * scale;
+          const dh = img.height * scale;
+          const photoX = colX('left') + (COL_W - dw) / 2;
+          const photoY = ly - 4;
+          page.drawRectangle({ x: photoX - 2, y: photoY - dh - 2, width: dw + 4, height: dh + 4, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 0.5 });
+          page.drawImage(img, { x: photoX, y: photoY - dh, width: dw, height: dh });
+          ly = photoY - dh - 10;
+        }
+      } catch {}
+    }
+
     const clientLines = [
       `${order.client.name}`, `CC: ${order.client.document}`, `Tel: ${order.client.phone}`,
       ...(order.client.email ? [`Email: ${order.client.email}`] : []),
     ];
     for (const line of clientLines) {
       this.drawSafe(page, line, { x: colTx('left'), y: ly, size: 9, font }); ly -= 14;
-    }
-    if (order.clientPhotoUrl) {
-      const photoX = MID - 130;
-      const photoY = ly + clientLines.length * 10;
-      page.drawRectangle({ x: photoX - 2, y: photoY - 82, width: 124, height: 84, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 0.5 });
-      await this.tryDrawImage(pdfDoc, page, order.clientPhotoUrl, photoX, photoY, 120, 80);
-      ly = Math.min(ly, photoY - 86);
     }
     ly -= SEC_BOTTOM_PAD;
 
