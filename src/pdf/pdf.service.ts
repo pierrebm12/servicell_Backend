@@ -135,7 +135,7 @@ export class PdfService {
 
     const clientLines = [
       `${order.client.name}`, `CC: ${order.client.document}`, `Tel: ${order.client.phone}`,
-      ...(order.client.email ? [`Email: ${order.client.email}`] : []),
+      ...(order.client.address ? [`Dirección: ${order.client.address}`] : []),
     ];
     for (const line of clientLines) {
       this.drawSafe(page, line, { x: colTx('left'), y: ly, size: 9, font }); ly -= 14;
@@ -156,9 +156,10 @@ export class PdfService {
 
     if (order.checklists?.length > 0) {
       ly = this.ensureSpaceAndSync(page, ly, 60 + order.checklists.length * 11, pdfDoc, (v) => ly = v, (v, p) => { ry = v; if (p) page = p; });
-      ly = this.drawSectionBox(page, 'CHECKLIST DE COMPONENTES', colX('left'), ly, boldFont);
+      const isPhysical = order.checklists.some((c: any) => ['Marco', 'Tapa', 'Visor (cámara)', 'Bandeja Sim', 'Estado de pantalla'].includes(c.componentName));
+      ly = this.drawSectionBox(page, isPhysical ? 'INSPECCIÓN FÍSICA' : 'INSPECCIÓN INTERNA', colX('left'), ly, boldFont);
       if (order.checklists.every((c: any) => c.notTestable)) {
-        this.drawSafe(page, 'DISPOSITIVO APAGADO — No fue posible realizar pruebas', { x: colTx('left'), y: ly, size: 7, font: boldFont, color: rgb(0.7, 0.35, 0) });
+        this.drawSafe(page, 'No fue posible realizar pruebas', { x: colTx('left'), y: ly, size: 7, font: boldFont, color: rgb(0.7, 0.35, 0) });
         ly -= 12;
       }
       for (const c of order.checklists) {
@@ -173,7 +174,7 @@ export class PdfService {
 
     // ── RIGHT ───────────────────────────────────────────────
     ry = this.drawSectionBox(page, 'DATOS DEL EQUIPO', colX('right'), ry, boldFont);
-    const eq = [`Marca: ${order.equipment.brand}    Modelo: ${order.equipment.model}`];
+    const eq = [`Marca: ${order.equipment.brand.toUpperCase()}    Modelo: ${order.equipment.model.toUpperCase()}`];
     if (order.equipment.imei) eq.push(`IMEI: ${order.equipment.imei}`);
     if (order.equipment.serial) eq.push(`Serial: ${order.equipment.serial}`);
     if (order.equipment.color) eq.push(`Color: ${order.equipment.color}`);
@@ -412,7 +413,7 @@ export class PdfService {
       y = this.drawSectionBox(page, 'RESUMEN DE COSTOS', MARGIN, y, boldFont);
       const costData: { label: string; value: string; bold?: boolean }[] = [];
       if (hasPartsCosts) costData.push({ label: 'Repuestos y materiales', value: `$${partsTotalCosts.toLocaleString('es-CO')}` });
-      if (hasLaborCosts) costData.push({ label: 'Mano de obra', value: `$${laborCosts.toLocaleString('es-CO')}` });
+      if (hasLaborCosts) costData.push({ label: 'Costo de reparación', value: `$${laborCosts.toLocaleString('es-CO')}` });
       const calcTotalCosts = partsTotalCosts + laborCosts;
       if (order.finalCost) {
         costData.push({ label: 'TOTAL', value: `$${Number(order.finalCost).toLocaleString('es-CO')}`, bold: true });

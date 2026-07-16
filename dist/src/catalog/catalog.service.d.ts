@@ -6,6 +6,7 @@ export declare class CatalogService implements OnModuleInit {
     private readonly logger;
     constructor(prisma: PrismaService);
     onModuleInit(): Promise<void>;
+    private migrateExisting;
     seed(): Promise<void>;
     getDeviceTypes(): Promise<{
         id: number;
