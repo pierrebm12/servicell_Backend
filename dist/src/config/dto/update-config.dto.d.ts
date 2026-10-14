@@ -7,10 +7,4 @@ export declare class UpdateConfigDto {
     pdfLogoUrl?: string;
     terms?: string;
     primaryColor?: string;
-    smtpHost?: string;
-    smtpPort?: number;
-    smtpUser?: string;
-    smtpPass?: string;
-    whatsappToken?: string;
-    whatsappPhoneId?: string;
 }

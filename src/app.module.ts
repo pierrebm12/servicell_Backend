@@ -13,8 +13,6 @@ import { PhotographsModule } from './photographs/photographs.module';
 import { SignaturesModule } from './signatures/signatures.module';
 import { PdfModule } from './pdf/pdf.module';
 import { QrModule } from './qr/qr.module';
-import { EmailModule } from './email/email.module';
-import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ReportsModule } from './reports/reports.module';
 import { ConfigModule as AppConfigModule } from './config/config.module';
@@ -38,8 +36,6 @@ import { VersionsModule } from './versions/versions.module';
     SignaturesModule,
     PdfModule,
     QrModule,
-    EmailModule,
-    WhatsappModule,
     InventoryModule,
     ReportsModule,
     AppConfigModule,

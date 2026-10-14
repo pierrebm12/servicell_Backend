@@ -384,36 +384,24 @@ let PdfService = PdfService_1 = class PdfService {
             const sigColW = (PAGE_W - MARGIN * 2 - 16) / 2 - 10;
             const sigBoxH = 70;
             y = this.ensureSpace(page, y, sigBoxH + 40, pdfDoc, (r) => { page = r.page; return r.y; });
-            const sigCliente = type === 'INGRESO' ? sigIngreso : sigEntrega;
-            const sigTecnico = type === 'INGRESO' ? sigEntrega : sigIngreso;
-            const labelCliente = type === 'INGRESO' ? 'Firma de Ingreso' : 'Firma de Entrega';
-            const labelTecnico = type === 'INGRESO' ? 'Firma de Entrega' : 'Firma de Ingreso';
-            const missingCliente = type === 'INGRESO' ? 'Sin firma de ingreso' : 'Sin firma de entrega';
-            const missingTecnico = type === 'INGRESO' ? 'Sin firma de entrega' : 'Sin firma de ingreso';
-            const cx1 = MARGIN + 8;
-            page.drawRectangle({ x: cx1, y: y - 14, width: sigColW + 10, height: 13, color: this.accentBg });
-            this.drawSafe(page, 'CLIENTE', { x: cx1 + 6, y: y - 3, size: 9, font: boldFont, color: this.accent });
-            let sigY = y - 16;
-            if (sigCliente) {
-                page.drawRectangle({ x: cx1 + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, color: (0, pdf_lib_1.rgb)(1, 1, 1) });
-                page.drawRectangle({ x: cx1 + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, borderColor: (0, pdf_lib_1.rgb)(0.7, 0.7, 0.7), borderWidth: 0.5 });
-                await this.tryDrawImage(pdfDoc, page, sigCliente.url, cx1 + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
-                this.drawSafe(page, labelCliente, { x: cx1 + 6, y: sigY - sigBoxH - 10, size: 7, font: boldFont, color: (0, pdf_lib_1.rgb)(0.4, 0.4, 0.4) });
-            }
-            else {
-                this.drawSafe(page, missingCliente, { x: cx1 + 6, y: sigY - 4, size: 8, font, color: (0, pdf_lib_1.rgb)(0.5, 0.5, 0.5) });
-            }
-            const cx2 = MID + 5;
-            page.drawRectangle({ x: cx2, y: y - 14, width: sigColW + 10, height: 13, color: this.accentBg });
-            this.drawSafe(page, 'TÉCNICO', { x: cx2 + 6, y: y - 3, size: 9, font: boldFont, color: this.accent });
-            if (sigTecnico) {
-                page.drawRectangle({ x: cx2 + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, color: (0, pdf_lib_1.rgb)(1, 1, 1) });
-                page.drawRectangle({ x: cx2 + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, borderColor: (0, pdf_lib_1.rgb)(0.7, 0.7, 0.7), borderWidth: 0.5 });
-                await this.tryDrawImage(pdfDoc, page, sigTecnico.url, cx2 + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
-                this.drawSafe(page, labelTecnico, { x: cx2 + 6, y: sigY - sigBoxH - 10, size: 7, font: boldFont, color: (0, pdf_lib_1.rgb)(0.4, 0.4, 0.4) });
-            }
-            else {
-                this.drawSafe(page, missingTecnico, { x: cx2 + 6, y: sigY - 4, size: 8, font, color: (0, pdf_lib_1.rgb)(0.5, 0.5, 0.5) });
+            const sigCols = [
+                { x: MARGIN + 8, sig: sigIngreso, title: 'RECIBIDO', label: 'Firma del cliente (recibido)', missing: 'Sin firma de recibido' },
+                { x: MID + 5, sig: sigEntrega, title: 'ENTREGA', label: 'Firma del cliente (entrega)', missing: 'Sin firma de entrega' },
+            ];
+            const sigY = y - 16;
+            for (const col of sigCols) {
+                page.drawRectangle({ x: col.x, y: y - 14, width: sigColW + 10, height: 13, color: this.accentBg });
+                this.drawSafe(page, col.title, { x: col.x + 6, y: y - 3, size: 9, font: boldFont, color: this.accent });
+                const sig = col.sig;
+                if (sig) {
+                    page.drawRectangle({ x: col.x + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, color: (0, pdf_lib_1.rgb)(1, 1, 1) });
+                    page.drawRectangle({ x: col.x + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, borderColor: (0, pdf_lib_1.rgb)(0.7, 0.7, 0.7), borderWidth: 0.5 });
+                    await this.tryDrawImage(pdfDoc, page, sig.url, col.x + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
+                    this.drawSafe(page, col.label, { x: col.x + 6, y: sigY - sigBoxH - 10, size: 7, font: boldFont, color: (0, pdf_lib_1.rgb)(0.4, 0.4, 0.4) });
+                }
+                else {
+                    this.drawSafe(page, col.missing, { x: col.x + 6, y: sigY - 4, size: 8, font, color: (0, pdf_lib_1.rgb)(0.5, 0.5, 0.5) });
+                }
             }
             y = Math.min(y, sigY - sigBoxH - 20) - SEC_BOTTOM_PAD;
         }
@@ -661,7 +649,7 @@ let PdfService = PdfService_1 = class PdfService {
         const oy = y;
         const dotPositions = Array.from({ length: 9 }, (_, i) => ({
             cx: ox + (i % 3) * gap,
-            cy: oy + Math.floor(i / 3) * gap,
+            cy: oy + (2 - Math.floor(i / 3)) * gap,
         }));
         const accent = this.accent;
         for (let i = 0; i < indices.length - 1; i++) {

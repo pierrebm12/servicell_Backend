@@ -22,8 +22,6 @@ const photographs_module_1 = require("./photographs/photographs.module");
 const signatures_module_1 = require("./signatures/signatures.module");
 const pdf_module_1 = require("./pdf/pdf.module");
 const qr_module_1 = require("./qr/qr.module");
-const email_module_1 = require("./email/email.module");
-const whatsapp_module_1 = require("./whatsapp/whatsapp.module");
 const inventory_module_1 = require("./inventory/inventory.module");
 const reports_module_1 = require("./reports/reports.module");
 const config_module_1 = require("./config/config.module");
@@ -50,8 +48,6 @@ exports.AppModule = AppModule = __decorate([
             signatures_module_1.SignaturesModule,
             pdf_module_1.PdfModule,
             qr_module_1.QrModule,
-            email_module_1.EmailModule,
-            whatsapp_module_1.WhatsappModule,
             inventory_module_1.InventoryModule,
             reports_module_1.ReportsModule,
             config_module_1.ConfigModule,

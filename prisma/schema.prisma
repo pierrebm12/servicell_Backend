@@ -363,12 +363,6 @@ model CompanyConfig {
   pdfLogoUrl    String?
   terms         String?   @db.Text
   primaryColor  String   @default("#1976D2")
-  smtpHost      String?
-  smtpPort      Int?
-  smtpUser      String?
-  smtpPass      String?
-  whatsappToken String?
-  whatsappPhoneId String?
   updatedAt     DateTime @updatedAt
 
   @@map("configuracion_empresa")

@@ -14,12 +14,6 @@ export declare class ConfigService {
         pdfLogoUrl: string | null;
         terms: string | null;
         primaryColor: string;
-        smtpHost: string | null;
-        smtpPort: number | null;
-        smtpUser: string | null;
-        smtpPass: string | null;
-        whatsappToken: string | null;
-        whatsappPhoneId: string | null;
     }>;
     private readLocalFileAsDataUrl;
     update(dto: UpdateConfigDto): Promise<{
@@ -33,11 +27,5 @@ export declare class ConfigService {
         pdfLogoUrl: string | null;
         terms: string | null;
         primaryColor: string;
-        smtpHost: string | null;
-        smtpPort: number | null;
-        smtpUser: string | null;
-        smtpPass: string | null;
-        whatsappToken: string | null;
-        whatsappPhoneId: string | null;
     }>;
 }

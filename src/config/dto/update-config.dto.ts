@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class UpdateConfigDto {
   @IsOptional()
@@ -33,27 +33,4 @@ export class UpdateConfigDto {
   @IsString()
   primaryColor?: string;
 
-  @IsOptional()
-  @IsString()
-  smtpHost?: string;
-
-  @IsOptional()
-  @IsInt()
-  smtpPort?: number;
-
-  @IsOptional()
-  @IsString()
-  smtpUser?: string;
-
-  @IsOptional()
-  @IsString()
-  smtpPass?: string;
-
-  @IsOptional()
-  @IsString()
-  whatsappToken?: string;
-
-  @IsOptional()
-  @IsString()
-  whatsappPhoneId?: string;
 }
