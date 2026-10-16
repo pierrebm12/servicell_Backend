@@ -472,13 +472,28 @@ let PdfService = PdfService_1 = class PdfService {
             fs.mkdirSync(uploadsDir, { recursive: true });
         fs.writeFileSync(pathLib.join(uploadsDir, filename), pdfBytes);
         const pdfUrl = `/uploads/pdfs/${filename}`;
-        await this.prisma.pdf.create({ data: { url: pdfUrl, type, orderId: order.id } });
+        const existingPdf = await this.prisma.pdf.findFirst({ where: { orderId: order.id, type } });
+        if (existingPdf) {
+            await this.prisma.pdf.update({ where: { id: existingPdf.id }, data: { url: pdfUrl, createdAt: new Date() } });
+        }
+        else {
+            await this.prisma.pdf.create({ data: { url: pdfUrl, type, orderId: order.id } });
+        }
         return pdfUrl;
     }
     async getPdfByOrderNumber(orderNumber, type = 'INGRESO') {
         const order = await this.prisma.serviceOrder.findUnique({ where: { orderNumber } });
         if (!order)
             throw new common_1.NotFoundException('Order not found');
+        const cached = await this.prisma.pdf.findFirst({
+            where: { orderId: order.id, type },
+            orderBy: { id: 'desc' },
+        });
+        if (cached && cached.createdAt >= order.updatedAt) {
+            const cachedPath = pathLib.join(this.uploadDir, 'pdfs', cached.url.replace('/uploads/pdfs/', ''));
+            if (fs.existsSync(cachedPath))
+                return fs.readFileSync(cachedPath);
+        }
         const pdfUrl = await this.generateOrderPdf(order.id, type);
         const filePath = pathLib.join(this.uploadDir, 'pdfs', pdfUrl.replace('/uploads/pdfs/', ''));
         if (!fs.existsSync(filePath))

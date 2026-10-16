@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Param, ParseIntPipe, Query, UseGuards, Res } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { PdfService } from './pdf.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -18,6 +19,7 @@ export class PdfController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Get('public/:orderNumber')
   async getPublicPdf(
     @Param('orderNumber') orderNumber: string,

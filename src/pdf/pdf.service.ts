@@ -457,13 +457,31 @@ export class PdfService {
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
     fs.writeFileSync(pathLib.join(uploadsDir, filename), pdfBytes);
     const pdfUrl = `/uploads/pdfs/${filename}`;
-    await this.prisma.pdf.create({ data: { url: pdfUrl, type, orderId: order.id } });
+    const existingPdf = await this.prisma.pdf.findFirst({ where: { orderId: order.id, type } });
+    if (existingPdf) {
+      await this.prisma.pdf.update({ where: { id: existingPdf.id }, data: { url: pdfUrl, createdAt: new Date() } });
+    } else {
+      await this.prisma.pdf.create({ data: { url: pdfUrl, type, orderId: order.id } });
+    }
     return pdfUrl;
   }
 
   async getPdfByOrderNumber(orderNumber: string, type: 'INGRESO' | 'ENTREGA' = 'INGRESO'): Promise<Buffer> {
     const order = await this.prisma.serviceOrder.findUnique({ where: { orderNumber } });
     if (!order) throw new NotFoundException('Order not found');
+
+    // Serve the already generated PDF when it is still up to date instead of
+    // regenerating on every public/QR/WhatsApp hit (heavy: DB + remote images
+    // + sharp + disk write). Regenerate only if the order changed since.
+    const cached = await this.prisma.pdf.findFirst({
+      where: { orderId: order.id, type },
+      orderBy: { id: 'desc' },
+    });
+    if (cached && cached.createdAt >= order.updatedAt) {
+      const cachedPath = pathLib.join(this.uploadDir, 'pdfs', cached.url.replace('/uploads/pdfs/', ''));
+      if (fs.existsSync(cachedPath)) return fs.readFileSync(cachedPath);
+    }
+
     const pdfUrl = await this.generateOrderPdf(order.id, type);
     const filePath = pathLib.join(this.uploadDir, 'pdfs', pdfUrl.replace('/uploads/pdfs/', ''));
     if (!fs.existsSync(filePath)) throw new NotFoundException('PDF file not found');
