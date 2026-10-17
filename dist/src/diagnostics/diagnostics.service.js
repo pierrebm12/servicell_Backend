@@ -36,7 +36,7 @@ let DiagnosticsService = class DiagnosticsService {
         if (!order.status || order.status === 'RECIBIDO') {
             await this.prisma.serviceOrder.update({
                 where: { id: dto.orderId },
-                data: { status: 'DIAGNOSTICO' },
+                data: { status: 'EN_REPARACION' },
             });
         }
         return diagnostic;

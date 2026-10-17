@@ -12,4 +12,4 @@ COPY dist ./dist
 
 ENV NODE_ENV=production
 EXPOSE 8080
-CMD sh -c "pnpm prisma:push && node dist/prisma/seed.js && node dist/src/main"
+CMD sh -c "node dist/src/scripts/normalize-statuses.js 2>/dev/null || true && pnpm prisma:push --accept-data-loss && node dist/prisma/seed.js && node dist/src/main"

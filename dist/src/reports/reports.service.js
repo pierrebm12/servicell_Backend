@@ -71,7 +71,7 @@ let ReportsService = class ReportsService {
         const orders = await this.prisma.serviceOrder.findMany({
             where: {
                 status: {
-                    notIn: [client_1.OrderStatusEnum.ENTREGADO, client_1.OrderStatusEnum.CANCELADO],
+                    notIn: [client_1.OrderStatusEnum.ENTREGADO],
                 },
             },
             include: { client: true, equipment: true, assignedTo: true },
@@ -114,7 +114,7 @@ let ReportsService = class ReportsService {
             email: u.email,
             totalAssigned: u.ordersAssigned.length,
             completed: u.ordersAssigned.filter((o) => o.status === client_1.OrderStatusEnum.ENTREGADO).length,
-            inProgress: u.ordersAssigned.filter((o) => o.status !== client_1.OrderStatusEnum.ENTREGADO && o.status !== client_1.OrderStatusEnum.CANCELADO).length,
+            inProgress: u.ordersAssigned.filter((o) => o.status !== client_1.OrderStatusEnum.ENTREGADO).length,
             orders: u.ordersAssigned,
         }));
     }

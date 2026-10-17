@@ -23,10 +23,10 @@ export declare class DiagnosticsService {
         estimatedCost: number | null;
         orderId: number;
         userId: number;
-        approved: boolean;
         diagnosis: string;
         neededParts: string | null;
         estimatedTime: string | null;
+        approved: boolean;
         approvedAt: Date | null;
     }>;
     findByOrder(orderId: number): Promise<({
@@ -49,10 +49,10 @@ export declare class DiagnosticsService {
         estimatedCost: number | null;
         orderId: number;
         userId: number;
-        approved: boolean;
         diagnosis: string;
         neededParts: string | null;
         estimatedTime: string | null;
+        approved: boolean;
         approvedAt: Date | null;
     })[]>;
     approve(id: number): Promise<{
@@ -61,10 +61,10 @@ export declare class DiagnosticsService {
         estimatedCost: number | null;
         orderId: number;
         userId: number;
-        approved: boolean;
         diagnosis: string;
         neededParts: string | null;
         estimatedTime: string | null;
+        approved: boolean;
         approvedAt: Date | null;
     }>;
 }

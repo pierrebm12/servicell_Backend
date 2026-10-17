@@ -183,7 +183,7 @@ export class AuthService {
         orderNumber: 'ORD-2025-000003',
         reportedFault: 'No enciende',
         observations: 'Se mojó con agua, posible daño en placa',
-        status: 'DIAGNOSTICO',
+        status: 'EN_REPARACION',
         estimatedCost: 350000,
         clientId: client3.id,
         equipmentId: equip3.id,
@@ -212,7 +212,7 @@ export class AuthService {
         { orderId: order1.id, toStatus: 'EN_REPARACION', userId, fromStatus: 'RECIBIDO' },
         { orderId: order2.id, toStatus: 'RECIBIDO', userId },
         { orderId: order3.id, toStatus: 'RECIBIDO', userId },
-        { orderId: order3.id, toStatus: 'DIAGNOSTICO', userId, fromStatus: 'RECIBIDO' },
+        { orderId: order3.id, toStatus: 'EN_REPARACION', userId, fromStatus: 'RECIBIDO' },
         { orderId: order4.id, toStatus: 'RECIBIDO', userId },
       ],
     });

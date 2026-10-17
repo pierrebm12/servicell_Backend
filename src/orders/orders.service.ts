@@ -93,12 +93,8 @@ export class OrdersService {
     const where: any = {};
     const statusMap: Record<string, string[]> = {
       received: ['RECIBIDO'],
-      in_repair: ['DIAGNOSTICO', 'EN_REPARACION'],
-      pending_approval: ['ESPERANDO_APROBACION', 'ESPERANDO_REPUESTO'],
-      approved: ['REPARADO'],
-      ready: ['LISTO_ENTREGA'],
+      in_repair: ['EN_REPARACION'],
       delivered: ['ENTREGADO'],
-      cancelled: ['CANCELADO'],
     };
     if (filters?.status && filters.status !== 'all') {
       const backendStatuses = statusMap[filters.status];

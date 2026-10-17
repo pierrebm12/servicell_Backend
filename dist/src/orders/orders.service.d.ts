@@ -269,10 +269,10 @@ export declare class OrdersService {
             estimatedCost: number | null;
             orderId: number;
             userId: number;
-            approved: boolean;
             diagnosis: string;
             neededParts: string | null;
             estimatedTime: string | null;
+            approved: boolean;
             approvedAt: Date | null;
         })[];
         statusChanges: ({
