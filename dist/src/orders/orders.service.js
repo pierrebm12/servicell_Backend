@@ -19,10 +19,36 @@ let OrdersService = class OrdersService {
     }
     async generateOrderNumber() {
         const year = new Date().getFullYear();
-        const count = await this.prisma.serviceOrder.count({
-            where: { createdAt: { gte: new Date(year, 0, 1) } },
+        const prefix = `ORD-${year}-`;
+        const last = await this.prisma.serviceOrder.findFirst({
+            where: { orderNumber: { startsWith: prefix } },
+            orderBy: { orderNumber: 'desc' },
+            select: { orderNumber: true },
         });
-        return `ORD-${year}-${String(count + 1).padStart(6, '0')}`;
+        const seq = parseInt(String(last?.orderNumber || '').slice(prefix.length), 10);
+        return `${prefix}${String((Number.isFinite(seq) ? seq : 0) + 1).padStart(6, '0')}`;
+    }
+    async createWithRetry(data, attempts = 5) {
+        let lastError;
+        for (let i = 0; i < attempts; i++) {
+            try {
+                return await this.prisma.serviceOrder.create({
+                    data,
+                    include: {
+                        client: true, equipment: true, createdBy: true, assignedTo: true,
+                        deviceType: true, brand: true, model: true, serviceType: true,
+                        checklists: true, parts: true,
+                    },
+                });
+            }
+            catch (err) {
+                if (err?.code !== 'P2002' || i === attempts - 1)
+                    throw err;
+                lastError = err;
+                data.orderNumber = await this.generateOrderNumber();
+            }
+        }
+        throw lastError;
     }
     async create(dto, userId) {
         const client = await this.prisma.client.findUnique({ where: { id: dto.clientId } });
@@ -75,14 +101,7 @@ let OrdersService = class OrdersService {
                 })),
             };
         }
-        const order = await this.prisma.serviceOrder.create({
-            data,
-            include: {
-                client: true, equipment: true, createdBy: true, assignedTo: true,
-                deviceType: true, brand: true, model: true, serviceType: true,
-                checklists: true, parts: true,
-            },
-        });
+        const order = await this.createWithRetry(data);
         if (dto.repairNotes) {
             await this.prisma.repairNote.create({
                 data: { content: dto.repairNotes, step: 'ingreso', orderId: order.id, userId },

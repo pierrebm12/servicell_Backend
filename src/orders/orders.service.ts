@@ -11,10 +11,35 @@ export class OrdersService {
 
   private async generateOrderNumber(): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.prisma.serviceOrder.count({
-      where: { createdAt: { gte: new Date(year, 0, 1) } },
+    const prefix = `ORD-${year}-`;
+    const last = await this.prisma.serviceOrder.findFirst({
+      where: { orderNumber: { startsWith: prefix } },
+      orderBy: { orderNumber: 'desc' },
+      select: { orderNumber: true },
     });
-    return `ORD-${year}-${String(count + 1).padStart(6, '0')}`;
+    const seq = parseInt(String(last?.orderNumber || '').slice(prefix.length), 10);
+    return `${prefix}${String((Number.isFinite(seq) ? seq : 0) + 1).padStart(6, '0')}`;
+  }
+
+  private async createWithRetry(data: any, attempts = 5): Promise<any> {
+    let lastError: any;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await this.prisma.serviceOrder.create({
+          data,
+          include: {
+            client: true, equipment: true, createdBy: true, assignedTo: true,
+            deviceType: true, brand: true, model: true, serviceType: true,
+            checklists: true, parts: true,
+          },
+        });
+      } catch (err: any) {
+        if (err?.code !== 'P2002' || i === attempts - 1) throw err;
+        lastError = err;
+        data.orderNumber = await this.generateOrderNumber();
+      }
+    }
+    throw lastError;
   }
 
   async create(dto: CreateOrderDto, userId: number) {
@@ -71,14 +96,7 @@ export class OrdersService {
       };
     }
 
-    const order = await this.prisma.serviceOrder.create({
-      data,
-      include: {
-        client: true, equipment: true, createdBy: true, assignedTo: true,
-        deviceType: true, brand: true, model: true, serviceType: true,
-        checklists: true, parts: true,
-      },
-    });
+    const order = await this.createWithRetry(data);
 
     if (dto.repairNotes) {
       await this.prisma.repairNote.create({
