@@ -52,7 +52,9 @@ export class EquipmentService {
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    const equipment = await this.prisma.equipment.findUnique({ where: { id } });
+    if (!equipment) throw new NotFoundException('Equipment not found');
+    if (!equipment.isActive) return { message: 'Equipment already deactivated' };
     await this.prisma.equipment.update({ where: { id }, data: { isActive: false } });
     return { message: 'Equipment deactivated' };
   }
