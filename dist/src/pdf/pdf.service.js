@@ -62,6 +62,9 @@ const COL_W = MID - MARGIN - 8;
 const SEC_H = 20;
 const GAP_AFTER_SECTION = 6;
 const SEC_BOTTOM_PAD = 12;
+const CO_TIME_ZONE = 'America/Bogota';
+const formatCoDate = (value) => value ? new Date(value).toLocaleDateString('es-CO', { timeZone: CO_TIME_ZONE }) : '—';
+const formatCoDateTime = (value) => value ? new Date(value).toLocaleString('es-CO', { timeZone: CO_TIME_ZONE }) : '—';
 let PdfService = PdfService_1 = class PdfService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -120,7 +123,7 @@ let PdfService = PdfService_1 = class PdfService {
             x: MARGIN, y, size: 15, font: boldFont, color: this.accent,
         });
         y -= 16;
-        this.drawSafe(page, `No. ${order.orderNumber}     Fecha: ${order.createdAt.toLocaleDateString('es-CO')}     Estado: ${order.status}`, {
+        this.drawSafe(page, `No. ${order.orderNumber}     Fecha: ${formatCoDate(order.createdAt)}     Estado: ${order.status}`, {
             x: MARGIN, y, size: 9, font,
         });
         y -= 18;
@@ -314,7 +317,7 @@ let PdfService = PdfService_1 = class PdfService {
                 y = this.ensureSpace(page, y, 22, pdfDoc, (r) => r.y);
                 page.drawCircle({ x: MARGIN + 5, y: y - 3, size: 3, color: this.accent });
                 page.drawLine({ start: { x: MARGIN + 5, y: y - 3 }, end: { x: MARGIN + 5, y: y - 18 }, thickness: 0.5, color: (0, pdf_lib_1.rgb)(0.8, 0.8, 0.8) });
-                this.drawSafe(page, `${sc.createdAt.toLocaleString('es-CO')}  —  ${sc.toStatus}`, { x: MARGIN + 14, y, size: 8, font: boldFont });
+                this.drawSafe(page, `${formatCoDateTime(sc.createdAt)}  —  ${sc.toStatus}`, { x: MARGIN + 14, y, size: 8, font: boldFont });
                 y -= 11;
                 if (sc.user?.name || sc.reason) {
                     this.drawSafe(page, [sc.user?.name, sc.reason].filter(Boolean).join(' · '), { x: MARGIN + 14, y, size: 7, font, color: (0, pdf_lib_1.rgb)(0.4, 0.4, 0.4) });
