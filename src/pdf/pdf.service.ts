@@ -375,9 +375,7 @@ export class PdfService {
 
         const sig = col.sig;
         if (sig) {
-          page.drawRectangle({ x: col.x + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, color: rgb(1, 1, 1) });
-          page.drawRectangle({ x: col.x + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 0.5 });
-          await this.tryDrawImage(pdfDoc, page, sig.url, col.x + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
+          await this.drawSignature(pdfDoc, page, sig.url, col.x + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
           this.drawSafe(page, col.label, { x: col.x + 6, y: sigY - sigBoxH - 10, size: 7, font: boldFont, color: rgb(0.4, 0.4, 0.4) });
         } else {
           this.drawSafe(page, col.missing, { x: col.x + 6, y: sigY - 4, size: 8, font, color: rgb(0.5, 0.5, 0.5) });
@@ -535,6 +533,71 @@ export class PdfService {
       page.drawImage(img, { x, y: y - drawH, width: drawW, height: drawH });
       return drawH;
     } catch (e) { this.logger.warn(`tryDrawLogo failed: ${e.message}`); return 0; }
+  }
+
+  // Draw a signature as black strokes on a transparent background (no box, no border).
+  private async drawSignature(pdfDoc: PDFDocument, page: PDFPage, url: string, x: number, y: number, maxW: number, maxH: number): Promise<number> {
+    if (!url) return 0;
+    try {
+      const buf = await this.fetchImageBuffer(url);
+      if (!buf || buf.length < 20) return 0;
+      const png = await this.toBlackOnTransparentPng(buf);
+      if (!png) return this.tryDrawImage(pdfDoc, page, url, x, y, maxW, maxH);
+      const img = await pdfDoc.embedPng(png);
+      const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+      const dw = img.width * scale;
+      const dh = img.height * scale;
+      page.drawImage(img, { x, y: y - dh, width: dw, height: dh });
+      return dh;
+    } catch { return 0; }
+  }
+
+  // Convert an arbitrary signature image into black strokes on a transparent
+  // background. Handles both opaque backgrounds (light or dark) and images that
+  // already have transparency (e.g. SVG-generated signatures).
+  private async toBlackOnTransparentPng(buf: Buffer): Promise<Buffer | null> {
+    try {
+      const meta = await sharp(buf, { density: 200 }).metadata();
+      let pipeline = sharp(buf, { density: 200 });
+      if (meta.width && meta.width > 700) pipeline = pipeline.resize({ width: 700 });
+
+      const { data, info } = await pipeline.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      const { width, height, channels } = info;
+      const px = width * height;
+
+      let transparentCount = 0;
+      let lumSum = 0;
+      for (let i = 0; i < px; i++) {
+        const o = i * channels;
+        if (data[o + 3] < 250) transparentCount++;
+        lumSum += 0.299 * data[o] + 0.587 * data[o + 1] + 0.114 * data[o + 2];
+      }
+
+      const hasAlpha = transparentCount > px * 0.02;
+      const bgLight = lumSum / px > 127;
+
+      const out = Buffer.alloc(px * 4);
+      for (let i = 0; i < px; i++) {
+        const o = i * channels;
+        let alpha: number;
+        if (hasAlpha) {
+          alpha = data[o + 3];
+        } else {
+          const lum = 0.299 * data[o] + 0.587 * data[o + 1] + 0.114 * data[o + 2];
+          const strength = bgLight ? (255 - lum) / 255 : lum / 255;
+          alpha = Math.max(0, Math.min(255, Math.round(((strength - 0.1) / 0.9) * 255)));
+        }
+        const oo = i * 4;
+        out[oo] = 0;
+        out[oo + 1] = 0;
+        out[oo + 2] = 0;
+        out[oo + 3] = alpha;
+      }
+
+      return await sharp(out, { raw: { width, height, channels: 4 } }).png().toBuffer();
+    } catch {
+      return null;
+    }
   }
 
   private async tryDrawImage(pdfDoc: PDFDocument, page: PDFPage, url: string, x: number, y: number, maxW: number, maxH: number): Promise<number> {

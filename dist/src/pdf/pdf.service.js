@@ -394,9 +394,7 @@ let PdfService = PdfService_1 = class PdfService {
                 this.drawSafe(page, col.title, { x: col.x + 6, y: y - 3, size: 9, font: boldFont, color: this.accent });
                 const sig = col.sig;
                 if (sig) {
-                    page.drawRectangle({ x: col.x + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, color: (0, pdf_lib_1.rgb)(1, 1, 1) });
-                    page.drawRectangle({ x: col.x + 2, y: sigY - sigBoxH, width: sigColW + 6, height: sigBoxH, borderColor: (0, pdf_lib_1.rgb)(0.7, 0.7, 0.7), borderWidth: 0.5 });
-                    await this.tryDrawImage(pdfDoc, page, sig.url, col.x + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
+                    await this.drawSignature(pdfDoc, page, sig.url, col.x + 6, sigY - 4, sigColW - 4, sigBoxH - 6);
                     this.drawSafe(page, col.label, { x: col.x + 6, y: sigY - sigBoxH - 10, size: 7, font: boldFont, color: (0, pdf_lib_1.rgb)(0.4, 0.4, 0.4) });
                 }
                 else {
@@ -550,6 +548,70 @@ let PdfService = PdfService_1 = class PdfService {
         catch (e) {
             this.logger.warn(`tryDrawLogo failed: ${e.message}`);
             return 0;
+        }
+    }
+    async drawSignature(pdfDoc, page, url, x, y, maxW, maxH) {
+        if (!url)
+            return 0;
+        try {
+            const buf = await this.fetchImageBuffer(url);
+            if (!buf || buf.length < 20)
+                return 0;
+            const png = await this.toBlackOnTransparentPng(buf);
+            if (!png)
+                return this.tryDrawImage(pdfDoc, page, url, x, y, maxW, maxH);
+            const img = await pdfDoc.embedPng(png);
+            const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+            const dw = img.width * scale;
+            const dh = img.height * scale;
+            page.drawImage(img, { x, y: y - dh, width: dw, height: dh });
+            return dh;
+        }
+        catch {
+            return 0;
+        }
+    }
+    async toBlackOnTransparentPng(buf) {
+        try {
+            const meta = await (0, sharp_1.default)(buf, { density: 200 }).metadata();
+            let pipeline = (0, sharp_1.default)(buf, { density: 200 });
+            if (meta.width && meta.width > 700)
+                pipeline = pipeline.resize({ width: 700 });
+            const { data, info } = await pipeline.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+            const { width, height, channels } = info;
+            const px = width * height;
+            let transparentCount = 0;
+            let lumSum = 0;
+            for (let i = 0; i < px; i++) {
+                const o = i * channels;
+                if (data[o + 3] < 250)
+                    transparentCount++;
+                lumSum += 0.299 * data[o] + 0.587 * data[o + 1] + 0.114 * data[o + 2];
+            }
+            const hasAlpha = transparentCount > px * 0.02;
+            const bgLight = lumSum / px > 127;
+            const out = Buffer.alloc(px * 4);
+            for (let i = 0; i < px; i++) {
+                const o = i * channels;
+                let alpha;
+                if (hasAlpha) {
+                    alpha = data[o + 3];
+                }
+                else {
+                    const lum = 0.299 * data[o] + 0.587 * data[o + 1] + 0.114 * data[o + 2];
+                    const strength = bgLight ? (255 - lum) / 255 : lum / 255;
+                    alpha = Math.max(0, Math.min(255, Math.round(((strength - 0.1) / 0.9) * 255)));
+                }
+                const oo = i * 4;
+                out[oo] = 0;
+                out[oo + 1] = 0;
+                out[oo + 2] = 0;
+                out[oo + 3] = alpha;
+            }
+            return await (0, sharp_1.default)(out, { raw: { width, height, channels: 4 } }).png().toBuffer();
+        }
+        catch {
+            return null;
         }
     }
     async tryDrawImage(pdfDoc, page, url, x, y, maxW, maxH) {

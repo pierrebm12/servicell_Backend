@@ -17,6 +17,8 @@ export declare class PdfService {
     private ensureSpaceAndSync;
     private drawSectionBox;
     private tryDrawLogo;
+    private drawSignature;
+    private toBlackOnTransparentPng;
     private tryDrawImage;
     private fetchImageBuffer;
     private drawJustifiedText;
