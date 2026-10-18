@@ -22,6 +22,7 @@ export declare class ReportsService {
             equipment: {
                 brand: string;
                 id: number;
+                isActive: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 model: string;
@@ -93,6 +94,7 @@ export declare class ReportsService {
             equipment: {
                 brand: string;
                 id: number;
+                isActive: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 model: string;
@@ -148,6 +150,7 @@ export declare class ReportsService {
             equipment: {
                 brand: string;
                 id: number;
+                isActive: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 model: string;
@@ -222,67 +225,20 @@ export declare class ReportsService {
         totalAssigned: number;
         completed: number;
         inProgress: number;
-        orders: ({
-            client: {
-                email: string | null;
-                id: number;
-                name: string;
-                phone: string;
-                createdAt: Date;
-                updatedAt: Date;
-                document: string;
-                address: string | null;
-            };
-            equipment: {
-                brand: string;
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                model: string;
-                imei: string | null;
-                serial: string | null;
-                color: string | null;
-                operator: string | null;
-                accessories: string | null;
-            };
-        } & {
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            orderNumber: string;
-            reportedFault: string;
-            observations: string | null;
-            physicalState: string | null;
-            devicePassword: string | null;
-            devicePattern: string | null;
-            lockCode: string | null;
-            lockCodeType: string | null;
-            laborCost: number | null;
-            clientPhotoUrl: string | null;
-            status: import("@prisma/client").$Enums.OrderStatusEnum;
-            estimatedCost: number | null;
-            finalCost: number | null;
-            downPayment: number | null;
-            estimatedDate: Date | null;
-            deliveredAt: Date | null;
-            clientId: number;
-            equipmentId: number;
-            createdById: number;
-            assignedToId: number | null;
-            deviceTypeId: number | null;
-            brandId: number | null;
-            modelId: number | null;
-            serviceTypeId: number | null;
-        })[];
+        revenue: number;
     }[]>;
     partsUsed(period: 'day' | 'week' | 'month' | 'year', date?: string): Promise<{
         period: "day" | "week" | "month" | "year";
         start: Date;
         end: Date;
-        parts: Record<string, {
+        total: number;
+        parts: {
+            name: string;
             total: number;
-            items: any[];
-        }>;
+            totalCost: number;
+            fromOrders: number;
+            lastUsedAt: Date | null;
+        }[];
     }>;
     frequentClients(period: 'day' | 'week' | 'month' | 'year', date?: string): Promise<{
         id: number;
@@ -290,5 +246,7 @@ export declare class ReportsService {
         document: string;
         phone: string;
         totalOrders: number;
+        totalSpent: number;
+        lastOrderAt: Date | null;
     }[]>;
 }

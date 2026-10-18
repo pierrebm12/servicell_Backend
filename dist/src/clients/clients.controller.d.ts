@@ -50,6 +50,7 @@ export declare class ClientsController {
             equipment: {
                 brand: string;
                 id: number;
+                isActive: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 model: string;
