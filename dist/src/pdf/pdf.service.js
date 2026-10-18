@@ -388,7 +388,7 @@ let PdfService = PdfService_1 = class PdfService {
             const sigBoxH = 70;
             y = this.ensureSpace(page, y, sigBoxH + 40, pdfDoc, (r) => { page = r.page; return r.y; });
             const sigCols = [
-                { x: MARGIN + 8, sig: sigIngreso, title: 'RECIBIDO', label: 'Firma del cliente (recibido)', missing: 'Sin firma de recibido' },
+                { x: MARGIN + 8, sig: sigIngreso, title: 'RECIBIDO', label: 'Firma del emisor (recibido)', missing: 'Sin firma de recibido' },
                 { x: MID + 5, sig: sigEntrega, title: 'ENTREGA', label: 'Firma del cliente (entrega)', missing: 'Sin firma de entrega' },
             ];
             const sigY = y - 16;
