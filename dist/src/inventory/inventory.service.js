@@ -59,7 +59,15 @@ let InventoryService = class InventoryService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.inventoryItem.delete({ where: { id } });
+        try {
+            await this.prisma.inventoryItem.delete({ where: { id } });
+        }
+        catch (error) {
+            if (error?.code === 'P2003') {
+                throw new common_1.BadRequestException('No se puede eliminar: el artículo tiene movimientos asociados');
+            }
+            throw error;
+        }
         return { message: 'Item deleted' };
     }
     async createMovement(dto, userId) {

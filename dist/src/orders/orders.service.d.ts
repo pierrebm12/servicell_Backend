@@ -21,6 +21,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -145,6 +146,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -223,6 +225,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -432,6 +435,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -493,6 +497,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -558,6 +563,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -610,6 +616,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -675,6 +682,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;
@@ -740,6 +748,7 @@ export declare class OrdersService {
         equipment: {
             brand: string;
             id: number;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
             model: string;

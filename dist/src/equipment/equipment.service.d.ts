@@ -7,6 +7,7 @@ export declare class EquipmentService {
     create(dto: CreateEquipmentDto): Promise<{
         brand: string;
         id: number;
+        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         model: string;
@@ -19,6 +20,7 @@ export declare class EquipmentService {
     findAll(search?: string): Promise<{
         brand: string;
         id: number;
+        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         model: string;
@@ -31,6 +33,7 @@ export declare class EquipmentService {
     findOne(id: number): Promise<{
         brand: string;
         id: number;
+        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         model: string;
@@ -43,6 +46,7 @@ export declare class EquipmentService {
     update(id: number, dto: UpdateEquipmentDto): Promise<{
         brand: string;
         id: number;
+        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         model: string;
@@ -58,6 +62,7 @@ export declare class EquipmentService {
     search(q: string): Promise<{
         brand: string;
         id: number;
+        isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
         model: string;

@@ -52,7 +52,14 @@ export class InventoryService {
 
   async remove(id: number) {
     await this.findOne(id);
-    await this.prisma.inventoryItem.delete({ where: { id } });
+    try {
+      await this.prisma.inventoryItem.delete({ where: { id } });
+    } catch (error: any) {
+      if (error?.code === 'P2003') {
+        throw new BadRequestException('No se puede eliminar: el artículo tiene movimientos asociados');
+      }
+      throw error;
+    }
     return { message: 'Item deleted' };
   }
 

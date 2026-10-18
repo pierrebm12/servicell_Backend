@@ -38,7 +38,14 @@ export class ClientsService {
 
   async remove(id: number) {
     await this.findOne(id);
-    await this.prisma.client.delete({ where: { id } });
+    try {
+      await this.prisma.client.delete({ where: { id } });
+    } catch (error: any) {
+      if (error?.code === 'P2003') {
+        throw new ConflictException('No se puede eliminar: el cliente tiene órdenes asociadas');
+      }
+      throw error;
+    }
     return { message: 'Client deleted' };
   }
 

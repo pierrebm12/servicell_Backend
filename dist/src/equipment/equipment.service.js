@@ -19,25 +19,33 @@ let EquipmentService = class EquipmentService {
     async create(dto) {
         if (dto.imei) {
             const existing = await this.prisma.equipment.findUnique({ where: { imei: dto.imei } });
-            if (existing)
+            if (existing) {
+                if (!existing.isActive) {
+                    return this.prisma.equipment.update({
+                        where: { id: existing.id },
+                        data: { ...dto, isActive: true },
+                    });
+                }
                 throw new common_1.ConflictException('IMEI already exists');
+            }
         }
         return this.prisma.equipment.create({ data: dto });
     }
     async findAll(search) {
-        const where = search ? {
-            OR: [
+        const where = { isActive: true };
+        if (search) {
+            where.OR = [
                 { imei: { contains: search } },
                 { serial: { contains: search } },
                 { model: { contains: search } },
                 { brand: { contains: search } },
-            ],
-        } : {};
+            ];
+        }
         return this.prisma.equipment.findMany({ where, orderBy: { createdAt: 'desc' } });
     }
     async findOne(id) {
         const equipment = await this.prisma.equipment.findUnique({ where: { id } });
-        if (!equipment)
+        if (!equipment || !equipment.isActive)
             throw new common_1.NotFoundException('Equipment not found');
         return equipment;
     }
@@ -52,12 +60,13 @@ let EquipmentService = class EquipmentService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.equipment.delete({ where: { id } });
-        return { message: 'Equipment deleted' };
+        await this.prisma.equipment.update({ where: { id }, data: { isActive: false } });
+        return { message: 'Equipment deactivated' };
     }
     async search(q) {
         return this.prisma.equipment.findMany({
             where: {
+                isActive: true,
                 OR: [
                     { imei: { contains: q } },
                     { serial: { contains: q } },

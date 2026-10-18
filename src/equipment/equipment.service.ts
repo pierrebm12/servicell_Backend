@@ -10,26 +10,35 @@ export class EquipmentService {
   async create(dto: CreateEquipmentDto) {
     if (dto.imei) {
       const existing = await this.prisma.equipment.findUnique({ where: { imei: dto.imei } });
-      if (existing) throw new ConflictException('IMEI already exists');
+      if (existing) {
+        if (!existing.isActive) {
+          return this.prisma.equipment.update({
+            where: { id: existing.id },
+            data: { ...dto, isActive: true },
+          });
+        }
+        throw new ConflictException('IMEI already exists');
+      }
     }
     return this.prisma.equipment.create({ data: dto });
   }
 
   async findAll(search?: string) {
-    const where = search ? {
-      OR: [
+    const where: any = { isActive: true };
+    if (search) {
+      where.OR = [
         { imei: { contains: search } },
         { serial: { contains: search } },
         { model: { contains: search } },
         { brand: { contains: search } },
-      ],
-    } : {};
+      ];
+    }
     return this.prisma.equipment.findMany({ where, orderBy: { createdAt: 'desc' } });
   }
 
   async findOne(id: number) {
     const equipment = await this.prisma.equipment.findUnique({ where: { id } });
-    if (!equipment) throw new NotFoundException('Equipment not found');
+    if (!equipment || !equipment.isActive) throw new NotFoundException('Equipment not found');
     return equipment;
   }
 
@@ -44,13 +53,14 @@ export class EquipmentService {
 
   async remove(id: number) {
     await this.findOne(id);
-    await this.prisma.equipment.delete({ where: { id } });
-    return { message: 'Equipment deleted' };
+    await this.prisma.equipment.update({ where: { id }, data: { isActive: false } });
+    return { message: 'Equipment deactivated' };
   }
 
   async search(q: string) {
     return this.prisma.equipment.findMany({
       where: {
+        isActive: true,
         OR: [
           { imei: { contains: q } },
           { serial: { contains: q } },

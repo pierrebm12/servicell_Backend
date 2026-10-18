@@ -281,7 +281,15 @@ let OrdersService = class OrdersService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.serviceOrder.delete({ where: { id } });
+        try {
+            await this.prisma.serviceOrder.delete({ where: { id } });
+        }
+        catch (error) {
+            if (error?.code === 'P2003') {
+                throw new common_1.BadRequestException('No se puede eliminar: la orden tiene registros asociados');
+            }
+            throw error;
+        }
         return { message: 'Order deleted' };
     }
     async addRepairNote(id, dto, userId) {
